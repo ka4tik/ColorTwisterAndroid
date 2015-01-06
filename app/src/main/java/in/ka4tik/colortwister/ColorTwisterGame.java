@@ -1,5 +1,7 @@
 package in.ka4tik.colortwister;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 
 import java.util.Random;
@@ -9,11 +11,16 @@ import java.util.Random;
  */
 public class ColorTwisterGame {
 
+
     public static final int TIME_OUT=5;
     private int score;
     private int lives;
     private Random rnd;
     private boolean isGameOver;
+    private int print_color;
+    private int answer;
+    private String display_text;
+    private boolean askedPrintColor;
     public ColorTwisterGame()
     {
         score=0;
@@ -21,11 +28,9 @@ public class ColorTwisterGame {
         rnd=new Random();
         isGameOver=false;
         generateNewTwister();
+
     }
-    private int print_color;
-    private int answer;
-    private String display_text;
-    private boolean askedPrintColor;
+
     String colortoString(int color)
     {
         String str = "";

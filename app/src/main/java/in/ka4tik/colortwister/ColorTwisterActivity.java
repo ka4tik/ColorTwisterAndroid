@@ -1,6 +1,8 @@
 package in.ka4tik.colortwister;
 
 import android.app.ActionBar;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -25,12 +27,12 @@ public class ColorTwisterActivity extends ActionBarActivity {
     ColorTwisterGame game;
     Timer timerGameEnd,timerEverySecond;
     int timeRemaning;
+    int bestScore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color_twister);
-
 
         RedButton=(Button)findViewById(R.id.red);
         GreenButton=(Button)findViewById(R.id.green);
@@ -45,11 +47,15 @@ public class ColorTwisterActivity extends ActionBarActivity {
         question=(TextView)findViewById(R.id.question);
 
         startNewGame();
-
     }
 
     void startNewGame()
     {
+        //getting preferences
+        //for getting best score
+        SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
+        bestScore = prefs.getInt("bestScore", 0); //0 is the default value
+
         game=new ColorTwisterGame();
         RedButton.setEnabled(true);
         GreenButton.setEnabled(true);
@@ -79,6 +85,7 @@ public class ColorTwisterActivity extends ActionBarActivity {
     }
     void update_view()
     {
+
         if(timerGameEnd!=null)
             timerGameEnd.cancel();
         if(timerEverySecond!=null)
@@ -86,12 +93,17 @@ public class ColorTwisterActivity extends ActionBarActivity {
         timeRemaning=ColorTwisterGame.TIME_OUT;
         if(!game.isGameOver())
         {
+            if(game.getScore()>bestScore)
+                bestScore=game.getScore();
+
             score.setText("Score: " + Integer.toString(game.getScore()));
             lives.setText("Lives: " + Integer.toString(game.getLives()));
+            timer.setTextColor(Color.BLACK);
             timer.setText(Integer.toString(timeRemaning));
-
             twister.setTextColor(game.getPrint_color());
             twister.setText(game.getDisplay_text());
+            bestscore.setText("Best Score: " + Integer.toString(bestScore));
+
             if(game.getAskedPrintColor())
                question.setText("What's color of above text?");
             else
@@ -106,6 +118,8 @@ public class ColorTwisterActivity extends ActionBarActivity {
                         @Override
                         public void run() {
                             timeRemaning--;
+                            if(timeRemaning<=2)
+                                timer.setTextColor(Color.RED);
                             timer.setText(Integer.toString(timeRemaning));
                         }
                     });
@@ -135,6 +149,10 @@ public class ColorTwisterActivity extends ActionBarActivity {
             GreenButton.setEnabled(false);
             YellowButton.setEnabled(false);
             BlueButton.setEnabled(false);
+            SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("bestScore", bestScore);
+            editor.apply();
             showGameOverPopUp(findViewById(R.id.twister));
         }
     }
