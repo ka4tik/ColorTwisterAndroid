@@ -73,6 +73,7 @@ public class ColorTwisterActivity extends ActionBarActivity {
         {
             score.setText("Score: " + Integer.toString(game.getScore()));
             lives.setText("Lives: " + Integer.toString(game.getLives()));
+
             twister.setTextColor(game.getPrint_color());
             twister.setText(game.getDisplay_text());
             if(game.getAskedPrintColor())

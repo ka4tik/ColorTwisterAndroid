@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:fbutton="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -18,7 +18,6 @@
             android:rowCount="1"
             android:columnCount="3"
             android:background="@android:color/holo_blue_light">
-
 
             <TextView
                 android:layout_width="wrap_content"
@@ -67,7 +66,8 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Twister"
                 android:id="@+id/twister"
-                android:layout_margin="10dp" />
+                android:layout_margin="10dp"
+                android:textSize="35dp" />
         </TableRow>
 
         <TableRow
@@ -99,22 +99,32 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
 
-                <Button
+
+                <info.hoang8f.widget.FButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Green"
+                    android:textColor="@android:color/white"
+                    fbutton:buttonColor="@color/fbutton_color_emerald"
+                    fbutton:shadowEnabled="true"
                     android:id="@+id/green"
                     android:layout_weight="2"/>
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
-                <Button
+
+
+                <info.hoang8f.widget.FButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Red"
+                    android:textColor="@android:color/white"
+                    fbutton:buttonColor="@color/fbutton_color_alizarin"
+                    fbutton:shadowEnabled="true"
                     android:id="@+id/red"
                     android:layout_weight="2"/>
+
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -130,22 +140,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
-                <Button
+                <info.hoang8f.widget.FButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Yellow"
+                    android:textColor="@android:color/white"
+                    fbutton:buttonColor="@color/fbutton_color_sun_flower"
+                    fbutton:shadowEnabled="true"
                     android:id="@+id/yellow"
                     android:layout_weight="2"/>
+
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
-                <Button
+
+                <info.hoang8f.widget.FButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Blue"
+                    android:textColor="@android:color/white"
+                    fbutton:shadowEnabled="true"
                     android:id="@+id/blue"
                     android:layout_weight="2"/>
+
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
