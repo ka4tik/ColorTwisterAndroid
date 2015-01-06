@@ -19,6 +19,7 @@
             android:columnCount="3"
             android:background="@android:color/holo_blue_light">
 
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -65,7 +66,8 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Twister"
-                android:id="@+id/twister" />
+                android:id="@+id/twister"
+                android:layout_margin="10dp" />
         </TableRow>
 
         <TableRow
@@ -78,39 +80,78 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="What color is above text ?"
-                android:id="@+id/question" />
+                android:id="@+id/question"
+                android:layout_margin="10dp" />
 
         </TableRow>
 
         <GridLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:rowCount="2"
-            android:columnCount="2">
+            android:columnCount="1"
+            android:layout_margin="10dp">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Green"
-                android:id="@+id/green" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal">
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Red"
-                android:id="@+id/red" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Green"
+                    android:id="@+id/green"
+                    android:layout_weight="2"/>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Red"
+                    android:id="@+id/red"
+                    android:layout_weight="2"/>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+            </LinearLayout>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yellow"
-                android:id="@+id/yellow" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Blue"
-                android:id="@+id/blue" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal">
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yellow"
+                    android:id="@+id/yellow"
+                    android:layout_weight="2"/>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blue"
+                    android:id="@+id/blue"
+                    android:layout_weight="2"/>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
         </GridLayout>
 
     </TableLayout>
