@@ -12,13 +12,20 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class ColorTwisterActivity extends ActionBarActivity {
 
+
     Button RedButton,GreenButton,BlueButton,YellowButton;
-    TextView score, lives,twister,question,bestscore;
+    TextView score, lives,twister,question,bestscore,timer;
     boolean isGameOver=false;
     ColorTwisterGame game;
+    Timer timerGameEnd,timerEverySecond;
+    int timeRemaning;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,7 +38,8 @@ public class ColorTwisterActivity extends ActionBarActivity {
         BlueButton=(Button)findViewById(R.id.blue);
 
         score=(TextView)findViewById(R.id.score);
-        lives =(TextView)findViewById(R.id.timer);
+        lives =(TextView)findViewById(R.id.lives);
+        timer=(TextView)findViewById(R.id.timer);
         twister=(TextView)findViewById(R.id.twister);
         bestscore=(TextView)findViewById(R.id.bestscore);
         question=(TextView)findViewById(R.id.question);
@@ -52,6 +60,8 @@ public class ColorTwisterActivity extends ActionBarActivity {
         GreenButton.setOnClickListener(new ButtonClickListener(Color.GREEN));
         YellowButton.setOnClickListener(new ButtonClickListener(Color.YELLOW));
         BlueButton.setOnClickListener(new ButtonClickListener(Color.BLUE));
+
+        timeRemaning=ColorTwisterGame.TIME_OUT;
         update_view();
     }
     private class ButtonClickListener implements View.OnClickListener {
@@ -69,17 +79,55 @@ public class ColorTwisterActivity extends ActionBarActivity {
     }
     void update_view()
     {
+        if(timerGameEnd!=null)
+            timerGameEnd.cancel();
+        if(timerEverySecond!=null)
+            timerEverySecond.cancel();
+        timeRemaning=ColorTwisterGame.TIME_OUT;
         if(!game.isGameOver())
         {
             score.setText("Score: " + Integer.toString(game.getScore()));
             lives.setText("Lives: " + Integer.toString(game.getLives()));
+            timer.setText(Integer.toString(timeRemaning));
 
             twister.setTextColor(game.getPrint_color());
             twister.setText(game.getDisplay_text());
             if(game.getAskedPrintColor())
-               question.setText("What's the color of above text?");
+               question.setText("What's color of above text?");
             else
                 question.setText("What's the above text?");
+
+            //create a timerGameEnd for 5 seconds
+            timerEverySecond=new Timer();
+            timerEverySecond.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            timeRemaning--;
+                            timer.setText(Integer.toString(timeRemaning));
+                        }
+                    });
+                }
+            },1000,1000);
+            //delay,peroid
+            timerGameEnd =new Timer();
+            timerGameEnd.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    //this is required as in android only thread that created the ui can update it
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            game.sendTimerExpired();
+                            update_view();
+                        }
+                    });
+
+                }
+            }, ColorTwisterGame.TIME_OUT*1000);
+
         }
         else
         {
@@ -105,7 +153,7 @@ public class ColorTwisterActivity extends ActionBarActivity {
                 startNewGame();
             }
         });
-        popupWindow.showAsDropDown(anchorView,50,-30);
+        popupWindow.showAsDropDown(anchorView, 50, -30);
     }
 
     @Override

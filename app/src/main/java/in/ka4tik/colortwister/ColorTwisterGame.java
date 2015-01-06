@@ -8,6 +8,8 @@ import java.util.Random;
  * Created by ka4tik on 1/6/15.
  */
 public class ColorTwisterGame {
+
+    public static final int TIME_OUT=5;
     private int score;
     private int lives;
     private Random rnd;
@@ -93,6 +95,14 @@ public class ColorTwisterGame {
             isGameOver=true;
         generateNewTwister();
     }
+    void sendTimerExpired()
+    {
+            lives--;
+        if(lives==0)
+            isGameOver=true;
+        generateNewTwister();
+    }
+
     boolean isGameOver()
     {
         return isGameOver;
