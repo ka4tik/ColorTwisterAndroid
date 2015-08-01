@@ -1,75 +1,83 @@
 package in.ka4tik.colortwister;
 
-import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.support.v7.app.ActionBarActivity;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.PopupWindow;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class ColorTwisterActivity extends ActionBarActivity {
+public class ColorTwisterActivity extends Activity {
 
 
-    Button RedButton,GreenButton,BlueButton,YellowButton;
-    TextView score, lives,twister,question,bestscore,timer;
-    boolean isGameOver=false;
-    ColorTwisterGame game;
-    Timer timerGameEnd,timerEverySecond;
-    int timeRemaning;
-    int bestScore;
+    private ImageView RedButton, GreenButton, BlueButton, YellowButton;
+    private TextView score, lives, twister, question, bestScoreTextView, timer;
+    private ColorTwisterGame game;
+    private Timer timerGameEnd, timerEverySecond;
+    private int timeRemaining;
+    private int bestScore;
+    private final int IN_GAME_WAIT_TIME = 500; // milli seconds
+    private MediaPlayer mMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color_twister);
 
-        RedButton=(Button)findViewById(R.id.red);
-        GreenButton=(Button)findViewById(R.id.green);
-        YellowButton=(Button)findViewById(R.id.yellow);
-        BlueButton=(Button)findViewById(R.id.blue);
+        RedButton = (ImageView) findViewById(R.id.red);
+        GreenButton = (ImageView) findViewById(R.id.green);
+        YellowButton = (ImageView) findViewById(R.id.yellow);
+        BlueButton = (ImageView) findViewById(R.id.blue);
 
-        score=(TextView)findViewById(R.id.score);
-        lives =(TextView)findViewById(R.id.lives);
-        timer=(TextView)findViewById(R.id.timer);
-        twister=(TextView)findViewById(R.id.twister);
-        bestscore=(TextView)findViewById(R.id.bestscore);
-        question=(TextView)findViewById(R.id.question);
+        score = (TextView) findViewById(R.id.score);
+        lives = (TextView) findViewById(R.id.lives);
+        timer = (TextView) findViewById(R.id.timer);
+        twister = (TextView) findViewById(R.id.twister);
+        bestScoreTextView = (TextView) findViewById(R.id.bestscore);
+        question = (TextView) findViewById(R.id.question);
+
 
         startNewGame();
     }
 
-    void startNewGame()
-    {
+    public void onPause() {
+        super.onPause();
+
+    }
+
+    public void onResume() {
+        super.onResume();
+
+    }
+
+    void startNewGame() {
         //getting preferences
         //for getting best score
         SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
         bestScore = prefs.getInt("bestScore", 0); //0 is the default value
 
-        game=new ColorTwisterGame();
-        RedButton.setEnabled(true);
-        GreenButton.setEnabled(true);
-        YellowButton.setEnabled(true);
-        BlueButton.setEnabled(true);
+        game = new ColorTwisterGame();
+
 
         RedButton.setOnClickListener(new ButtonClickListener(Color.RED));
         GreenButton.setOnClickListener(new ButtonClickListener(Color.GREEN));
         YellowButton.setOnClickListener(new ButtonClickListener(Color.YELLOW));
         BlueButton.setOnClickListener(new ButtonClickListener(Color.BLUE));
 
-        timeRemaning=ColorTwisterGame.TIME_OUT;
-        update_view();
+        timeRemaining = ColorTwisterGame.TIME_OUT;
+        updateView();
+        enableButtons();
+
     }
+
     private class ButtonClickListener implements View.OnClickListener {
         int color;
 
@@ -79,120 +87,148 @@ public class ColorTwisterActivity extends ActionBarActivity {
 
         public void onClick(View view) {
 
-           game.process_answer(color);
-           update_view();
+            boolean wasCorrect = game.processAnswer(color);
+            if (wasCorrect) {
+                if (mMediaPlayer != null) mMediaPlayer.release();
+                mMediaPlayer = MediaPlayer.create(ColorTwisterActivity.this, R.raw.reward_music);
+                mMediaPlayer.start();
+            } else {
+                if (mMediaPlayer != null) mMediaPlayer.release();
+                mMediaPlayer = MediaPlayer.create(ColorTwisterActivity.this, R.raw.aarrrrhh);
+                mMediaPlayer.start();
+
+            }
+            cancelTimers();
+            disableButtons();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateView();
+                        }
+                    });
+                }
+            }, IN_GAME_WAIT_TIME);
+        }
+
+    }
+
+    void cancelTimers() {
+        if (timerGameEnd != null)
+            timerGameEnd.cancel();
+        if (timerEverySecond != null) {
+            timerEverySecond.cancel();
+            timeRemaining = ColorTwisterGame.TIME_OUT;
         }
     }
-    void update_view()
-    {
 
-        if(timerGameEnd!=null)
-            timerGameEnd.cancel();
-        if(timerEverySecond!=null)
-            timerEverySecond.cancel();
-        timeRemaning=ColorTwisterGame.TIME_OUT;
-        if(!game.isGameOver())
-        {
-            if(game.getScore()>bestScore)
-                bestScore=game.getScore();
+    void updateView() {
 
-            score.setText("Score: " + Integer.toString(game.getScore()));
-            lives.setText("Lives: " + Integer.toString(game.getLives()));
+        if (mMediaPlayer != null) mMediaPlayer.release();
+
+        enableButtons();
+
+        if (!game.isGameOver()) {
+            if (game.getScore() > bestScore)
+                bestScore = game.getScore();
+
+            score.setText(Integer.toString(game.getScore()));
+            lives.setText(Integer.toString(game.getLives()));
             timer.setTextColor(Color.BLACK);
-            timer.setText(Integer.toString(timeRemaning));
-            twister.setTextColor(game.getPrint_color());
-            twister.setText(game.getDisplay_text());
-            bestscore.setText("Best Score: " + Integer.toString(bestScore));
+            timer.setText(Integer.toString(timeRemaining));
+            twister.setTextColor(game.getPrintColor());
+            twister.setText(game.getDisplayText());
+            bestScoreTextView.setText(Integer.toString(bestScore));
 
-            if(game.getAskedPrintColor())
-               question.setText("What's color of above text?");
+            if (game.getAskedPrintColor())
+                question.setText("What's color of above text?");
             else
                 question.setText("What's the above text?");
 
             //create a timerGameEnd for 5 seconds
-            timerEverySecond=new Timer();
+            timerEverySecond = new Timer();
             timerEverySecond.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            timeRemaning--;
-                            if(timeRemaning<=2)
+
+                            timeRemaining--;
+                            if (timeRemaining > 0) {
+                                if (mMediaPlayer != null) mMediaPlayer.release();
+
+                                mMediaPlayer = MediaPlayer.create(ColorTwisterActivity.this, R.raw.beep_tim);
+                                mMediaPlayer.start();
+                            }
+                            if (timeRemaining <= 2)
                                 timer.setTextColor(Color.RED);
-                            timer.setText(Integer.toString(timeRemaning));
+                            timer.setText(Integer.toString(timeRemaining));
                         }
                     });
                 }
-            },1000,1000);
-            //delay,peroid
-            timerGameEnd =new Timer();
+            }, 1000, 1000);
+            //delay,period
+            timerGameEnd = new Timer();
             timerGameEnd.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     //this is required as in android only thread that created the ui can update it
                     runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            game.sendTimerExpired();
-                            update_view();
-                        }
-                    });
+                                      @Override
+                                      public void run() {
+                                          game.sendTimerExpired();
+                                          cancelTimers();
+                                          disableButtons();
+                                          new Timer().schedule(new TimerTask() {
+                                              @Override
+                                              public void run() {
+                                                  runOnUiThread(new Runnable() {
+                                                      @Override
+                                                      public void run() {
+                                                          updateView();
+                                                      }
+                                                  });
+                                              }
+                                          }, IN_GAME_WAIT_TIME);
+                                      }
+
+                                  }
+                    );
 
                 }
-            }, ColorTwisterGame.TIME_OUT*1000);
+            }, ColorTwisterGame.TIME_OUT * 1000);
 
-        }
-        else
-        {
-            RedButton.setEnabled(false);
-            GreenButton.setEnabled(false);
-            YellowButton.setEnabled(false);
-            BlueButton.setEnabled(false);
+        } else {
+            disableButtons();
             SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
             editor.putInt("bestScore", bestScore);
             editor.apply();
-            showGameOverPopUp(findViewById(R.id.twister));
+            Intent intent = new Intent(this, GameOverActivity.class);
+
+            intent.putExtra("Score", game.getScore());
+            startActivity(intent);
         }
     }
 
-    void showGameOverPopUp(View anchorView)
-    {
-        LayoutInflater inflater=(LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupview=inflater.inflate(R.layout.gameover_popup,null);
-        final PopupWindow popupWindow=new PopupWindow(popupview, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
-
-        Button play_again=(Button)popupview.findViewById(R.id.playagain);
-        play_again.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-                startNewGame();
-            }
-        });
-        popupWindow.showAsDropDown(anchorView, 50, -30);
+    void disableButtons() {
+        RedButton.setEnabled(false);
+        GreenButton.setEnabled(false);
+        YellowButton.setEnabled(false);
+        BlueButton.setEnabled(false);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_color_twister, menu);
-        return true;
+    void enableButtons() {
+        RedButton.setEnabled(true);
+        GreenButton.setEnabled(true);
+        YellowButton.setEnabled(true);
+        BlueButton.setEnabled(true);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }
+
+
