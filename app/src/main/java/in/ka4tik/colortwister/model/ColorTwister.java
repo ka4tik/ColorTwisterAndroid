@@ -112,5 +112,8 @@ public class ColorTwister {
     public int getTimeRemaining() {
         return TIME_OUT - stopWatch.getElapsedTimeSeconds();
     }
+    public long getTimeRemainingMilliSec(){
+        return TIME_OUT*1000 - stopWatch.getElapsedTimeMillis();
+    }
 
 }

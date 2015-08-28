@@ -17,10 +17,12 @@ public class GameOverScreen extends Screen {
 
     private Canvas canvas;
     private Rect playAgainRect;
+    private int score;
 
-    public GameOverScreen(Game game) {
+    public GameOverScreen(Game game,int score) {
         super(game);
         canvas = game.getGraphics().getCanvas();
+        this.score = score;
     }
 
     @Override
@@ -34,6 +36,7 @@ public class GameOverScreen extends Screen {
             Input.TouchEvent event = touchEvents.get(i);
             if (event.type == Input.TouchEvent.TOUCH_UP) {
                 if (playAgainRect != null && playAgainRect.contains(event.x, event.y)) {
+                    Assets.click.play(1);
                     game.setScreen(new MainGameScreen(game));
                     break;
                 }
@@ -44,8 +47,8 @@ public class GameOverScreen extends Screen {
 
     @Override
     public void present(float deltaTime) {
-
-        ColorTwisterUtils.drawText(canvas, "Game Over!", 100, 480 / 2, Color.BLUE, 20);
+        canvas.drawRGB(255,221,205);
+        ColorTwisterUtils.drawText(canvas, "Game Over! You scored " + score, 50, 480 / 2, Color.BLUE, 20);
         playAgainRect = ColorTwisterUtils.drawText(canvas, "Play Again!", 80, 480 / 2 + 50, Color.GREEN, 30);
 
     }

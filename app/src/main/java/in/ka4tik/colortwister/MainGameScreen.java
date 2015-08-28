@@ -37,8 +37,8 @@ public class MainGameScreen extends Screen {
 
     @Override
     public void update(float deltaTime) {
-        if (!colorTwister.isGameOver()) {
 
+        if (!colorTwister.isGameOver()) {
             List<Input.TouchEvent> touchEvents = game.getInput().getTouchEvents();
             game.getInput().getKeyEvents();
 
@@ -48,53 +48,52 @@ public class MainGameScreen extends Screen {
                 if (event.type == Input.TouchEvent.TOUCH_UP) {
                     Point touchPoint = new Point(event.x, event.y);
                     Log.d("Touched ", touchPoint.toString());
+                    boolean isCircleTouched = false;
                     if (isInsideArc(touchPoint, CIRCLE_CENTER, 0, 90, CIRCLE_RADIUS)) {//red touched
                         Log.d("Red touched", touchEvents.toString());
                         colorTwister.processAnswer(in.ka4tik.colortwister.model.Color.RED);
-                        break;
-                    }
-                    if (isInsideArc(touchPoint, CIRCLE_CENTER, 90, 90, CIRCLE_RADIUS)) {//green touched
+                        isCircleTouched = true;
+                    } else if (isInsideArc(touchPoint, CIRCLE_CENTER, 90, 90, CIRCLE_RADIUS)) {//green touched
                         Log.d("Green touched", touchEvents.toString());
                         colorTwister.processAnswer(in.ka4tik.colortwister.model.Color.GREEN);
-                        break;
-                    }
-                    if (isInsideArc(touchPoint, CIRCLE_CENTER, 180, 90, CIRCLE_RADIUS)) {//blue touched
+                        isCircleTouched = true;
+                    } else if (isInsideArc(touchPoint, CIRCLE_CENTER, 180, 90, CIRCLE_RADIUS)) {//blue touched
                         Log.d("Yellow touched", touchEvents.toString());
                         colorTwister.processAnswer(in.ka4tik.colortwister.model.Color.BLUE);
-                        break;
-                    }
-                    if (isInsideArc(touchPoint, CIRCLE_CENTER, 270, 90, CIRCLE_RADIUS)) {//yellow touched
+                        isCircleTouched = true;
+                    } else if (isInsideArc(touchPoint, CIRCLE_CENTER, 270, 90, CIRCLE_RADIUS)) {//yellow touched
                         Log.d("Blue touched", touchEvents.toString());
                         colorTwister.processAnswer(in.ka4tik.colortwister.model.Color.YELLOW);
+                        isCircleTouched = true;
+                    }
+                    if (isCircleTouched) {
+                        Assets.click.play(1);
                         break;
                     }
 
                 }
             }
+        } else {
+            game.setScreen(new GameOverScreen(game,colorTwister.getScore()));
         }
     }
 
     @Override
     public void present(float deltaTime) {
 
-        game.getGraphics().clear(Color.BLACK);
-        if (colorTwister.isGameOver()) {
-            game.setScreen(new GameOverScreen(game));
-        } else {
-            Paint paint = new Paint();
-            paint.setColor(Color.BLACK);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setShadowLayer(10, 2, 2, Color.GRAY);
+        int backgroundColor = Color.rgb(225, 221, 205);
+        Log.d("Background color: ", backgroundColor+"");
+        if (!colorTwister.isGameOver()) {
+            canvas.drawRGB(255,221,205);
 
-            canvas.drawCircle(CIRCLE_CENTER.x, CIRCLE_CENTER.y, CIRCLE_RADIUS, paint);
             RectF oval = new RectF(
                     CIRCLE_CENTER.x - CIRCLE_RADIUS,
                     CIRCLE_CENTER.y - CIRCLE_RADIUS,
                     CIRCLE_CENTER.x + CIRCLE_RADIUS,
                     CIRCLE_CENTER.y + CIRCLE_RADIUS);
 
+            Paint paint = new Paint();
             paint.setStyle(Paint.Style.FILL);
-
             paint.setColor(Color.RED);
             canvas.drawArc(oval, 0, 90, true, paint);
             paint.setColor(Color.GREEN);
@@ -103,19 +102,41 @@ public class MainGameScreen extends Screen {
             canvas.drawArc(oval, 180, 90, true, paint);
             paint.setColor(Color.YELLOW);
             canvas.drawArc(oval, 270, 90, true, paint);
-
-            ColorTwisterUtils.drawText(canvas, "Score: " + colorTwister.getScore(), 0, 0, Color.WHITE, 20);
-            ColorTwisterUtils.drawText(canvas, "Lives: " + colorTwister.getLives(), screenWidth / 2 - 60, 0, Color.WHITE, 20);
-            ColorTwisterUtils.drawText(canvas, "Time Left: " + colorTwister.getTimeRemaining(), screenWidth - 130, 0, Color.WHITE, 20);
-            ColorTwisterUtils.drawText(canvas, colorTwister.getDisplayText(), 0, 30, getAndroidColor(colorTwister.getActualColor()), 20);
+            int textColor = Color.rgb(74,94,104);
+            ColorTwisterUtils.drawText(canvas, "Score: " + colorTwister.getScore(), 5, 5, textColor, 20);
+            ColorTwisterUtils.drawText(canvas, "Lives: " + colorTwister.getLives(), screenWidth / 2 - 60, 5, textColor, 20);
+            ColorTwisterUtils.drawText(canvas, "Time Left: " + colorTwister.getTimeRemaining(), screenWidth - 130, 5, textColor, 20);
             if (colorTwister.isAskedActualColor())
-                ColorTwisterUtils.drawText(canvas, "What's the color of above text", 0, 60, Color.WHITE, 20);
+                ColorTwisterUtils.drawText(canvas, "What's the color of below text", 5, 40, textColor, 20);
             else
-                ColorTwisterUtils.drawText(canvas, "What's the above text", 0, 60, Color.WHITE, 20);
+                ColorTwisterUtils.drawText(canvas, "What's the below text", 5, 40, textColor, 20);
+            ColorTwisterUtils.drawText(canvas, colorTwister.getDisplayText(), 110, 70, getAndroidColor(colorTwister.getActualColor()), 30);
+
+
+            drawTimerArc();
         }
 
     }
 
+    void drawTimerArc(){
+
+        RectF oval = new RectF(
+                CIRCLE_CENTER.x - CIRCLE_RADIUS,
+                CIRCLE_CENTER.y - CIRCLE_RADIUS,
+                CIRCLE_CENTER.x + CIRCLE_RADIUS,
+                CIRCLE_CENTER.y + CIRCLE_RADIUS);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.GRAY);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setShadowLayer(10, 2, 2, Color.GRAY);
+        paint.setStrokeWidth(8);
+
+        long timeRemainingMillis = colorTwister.getTimeRemainingMilliSec();
+        double sweepAngle = (timeRemainingMillis/(ColorTwister.TIME_OUT*1000.00))*360.00;
+        canvas.drawArc(oval,0,(float)sweepAngle,false,paint);
+
+    }
 
     @Override
     public void pause() {
@@ -171,7 +192,6 @@ public class MainGameScreen extends Screen {
         Point endPoint = new Point(center.x + CIRCLE_RADIUS * Math.cos(toRadian(startAngle + swipeAngle)),
                 center.y + CIRCLE_RADIUS * Math.sin(toRadian(startAngle + swipeAngle)));
 
-        Log.d("isInsideArc", startAngle + " " + startPoint.toString() + "  " + endPoint.toString());
         return isInsideSector(point, center, startPoint, endPoint, radius);
     }
 

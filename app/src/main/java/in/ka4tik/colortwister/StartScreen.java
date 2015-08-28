@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 
 import com.badlogic.androidgames.framework.Game;
+import com.badlogic.androidgames.framework.Graphics;
 import com.badlogic.androidgames.framework.Input;
 import com.badlogic.androidgames.framework.Screen;
 
@@ -18,6 +19,9 @@ public class StartScreen extends Screen {
 
     public StartScreen(Game game) {
         super(game);
+        Assets.background = game.getGraphics().newPixmap("background.jpg", Graphics.PixmapFormat.RGB565);
+        Assets.click = game.getAudio().newSound("click.ogg");
+
     }
 
     @Override
@@ -30,6 +34,7 @@ public class StartScreen extends Screen {
             Input.TouchEvent event = touchEvents.get(i);
             if (event.type == Input.TouchEvent.TOUCH_UP) {
                 if (startButtonRect != null && startButtonRect.contains(event.x, event.y)) {
+                    Assets.click.play(1);
                     game.setScreen(new MainGameScreen(game));
                     break;
                 }
